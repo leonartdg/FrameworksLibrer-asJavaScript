@@ -1,27 +1,189 @@
-//Variables
-var col= 7;
-var fil= 7;
-var arr= [];
-var mov= 0;
-var poi= 0;
-var val= 0;
-
-function game(f,c,obj,src) {
-return {
-f: f,
-c: c, 
-src:src, 
-locked:false, 
-isInCombo:false, 
-o:obj 
-}
-}
-
 //Animacion de titulo
 function go(){$(".main-titulo").animate({color:"yellow"}, "slow", function(){ come() } )}
 function come(){$(".main-titulo").animate({color:"white"}, "slow", function(){ go() })}
-
 go();
+
+
+//Tablero
+function insertarImg(GameArr, i) {
+
+  var Col1 = $('.col-1').children();
+  var Col2 = $('.col-2').children();
+  var Col3 = $('.col-3').children();
+  var Col4 = $('.col-4').children();
+  var Col5 = $('.col-5').children();
+  var Col6 = $('.col-6').children();
+  var Col7 = $('.col-7').children();
+
+  var cCols = $([Col1, Col2, Col3, Col4, Col5, Col6, Col7]);
+
+  if (typeof i === 'number') {
+    var cFila = $([Col1.eq(i), Col2.eq(i), Col3.eq(i), Col4.eq(i), Col5.eq(i), Col6.eq(i),Col7.eq(i)]);
+  } else {
+    i = '';
+  }
+
+  if (GameArr === 'cCols') {
+    return cCols;
+  } else if (GameArr === 'rows' && i !== '') {
+    return cFila;
+  }
+}
+
+//Crear Filas
+function cFilas(i) {
+  var cFila = insertarImg('rows', i);
+  return cFila;
+}
+
+//Crear Columnas
+function cCols(i) {
+  var Column = insertarImg('cCols');
+  return Column[i];
+}
+
+//Busqueda de columnas
+function ColV() {
+  for (var j = 0; j < 7; j++) {
+    var counter = 0;
+    var cPosition = [];
+    var extraPosition = [];
+    var Column = cCols(j);
+    var comparar = Column.eq(0);
+    var grieta = false;
+    for (var i = 1; i < Column.length; i++) {
+      var srcComparar = comparar.attr('src');
+      var srcFigure = Column.eq(i).attr('src');
+
+      if (srcComparar != srcFigure) {
+        if (cPosition.length >= 3) {
+          grieta = true;
+        } else {
+          cPosition = [];
+        }
+        counter = 0;
+      } else {
+        if (counter == 0) {
+          if (!grieta) {
+            cPosition.push(i-1);
+          } else {
+            extraPosition.push(i-1);
+          }
+        }
+        if (!grieta) {
+          cPosition.push(i);
+        } else {
+          extraPosition.push(i);
+        }
+        counter += 1;
+      }
+      comparar = Column.eq(i);
+    }
+    if (extraPosition.length > 2) {
+      cPosition = $.merge(cPosition, extraPosition);
+    }
+    if (cPosition.length <= 2) {
+      cPosition = [];
+    }
+    cPoint = cPosition.length;
+    if (cPoint >= 3) {
+      eliminarCol(cPosition, Column);
+      Point(cPoint);
+    }
+  }
+}
+
+//Añadir clase delete a Columna
+function eliminarCol(cPosition, Column) {
+  for (var i = 0; i < cPosition.length; i++) {
+    Column.eq(cPosition[i]).addClass('delete');
+  }
+}
+
+//Busqueda de filas
+function FilaV() {
+  for (var j = 0; j < 6; j++) {
+    var counter = 0;
+    var cPosition = [];
+    var extraPosition = [];
+    var cFila = cFilas(j);
+    var comparar = cFila[0];
+    var grieta = false;
+    for (var i = 1; i < cFila.length; i++) {
+      var srcComparar = comparar.attr('src');
+      var srcFigure = cFila[i].attr('src');
+
+      if (srcComparar != srcFigure) {
+        if (cPosition.length >= 3) {
+          grieta = true;
+        } else {
+          cPosition = [];
+        }
+        counter = 0;
+      } else {
+        if (counter == 0) {
+          if (!grieta) {
+            cPosition.push(i-1);
+          } else {
+            extraPosition.push(i-1);
+          }
+        }
+        if (!grieta) {
+          cPosition.push(i);
+        } else {
+          extraPosition.push(i);
+        }
+        counter += 1;
+      }
+      comparar = cFila[i];
+    }
+    if (extraPosition.length > 2) {
+      cPosition = $.merge(cPosition, extraPosition);
+    }
+    if (cPosition.length <= 2) {
+      cPosition = [];
+    }
+    cPoint = cPosition.length;
+    if (cPoint >= 3) {
+      eliminarFila(cPosition, cFila);
+      Point(cPoint);
+    }
+  }
+}
+
+//Añadir clase delete a Fila
+function eliminarFila(cPosition, cFila) {
+  for (var i = 0; i < cPosition.length; i++) {
+    cFila[cPosition[i]].addClass('delete');
+  }
+}
+
+//Establece puntos
+function Point(cPoint) {
+  var score = Number($('#score-text').text());
+  switch (cPoint) {
+    case 3:
+      score += 25;
+      break;
+    case 4:
+      score += 50;
+      break;
+    case 5:
+      score += 75;
+      break;
+    case 6:
+      score += 100;
+      break;
+    case 7:
+      score += 200;
+  }
+  $('#score-text').text(score);
+}
+
+//Llenar tablero
+function Btabla() {
+    llenar();
+}
 
 //arreglo de imagenes
 var img=[];
@@ -30,378 +192,175 @@ img[1]='image/2.png';
 img[2]='image/3.png';
 img[3]='image/4.png';
 
-//Numero aleatorio
+// //Numero aleatorio
 function NumeroAleatorio(){
-	var nImg = Math.floor(Math.random()*4);
-	return img[nImg];
+var nImg = Math.floor(Math.random()*4);
+return img[nImg];
 }
 
-//Tablero
-for (var f = 0; f < fil; f++) {
-	arr[f]=[];
-	for (var c =0; c< col; c++) {
-		arr[f][c]= new game(f,c,null,NumeroAleatorio());
-	}
+function llenar() {
+  var top = 6;
+  var column = $('[class^="col-"]');
+
+  column.each(function() {
+    var Figure = $(this).children().length;
+    var agrega = top - Figure;
+    for (var i = 0; i < agrega; i++) {
+      var imgAleatoria = NumeroAleatorio();
+      if (i == 0 && Figure < 1) {
+        $(this).append('<img src="'+imgAleatoria+'" class="element"></img>');
+      } else {
+        $(this).find('img:eq(0)').before('<img src="'+imgAleatoria+'" class="element"></img>');
+      }
+    }
+  });
+  addEvents();
+  ColFilaV();
 }
 
-//Coordenadas:
-var w = $('.panel-tablero').width();
-var h = $('.panel-tablero').height(); 
-var cw = w / 7;
-var ch= h/ 7;
-var mw = cw/7;
-var mh = ch/7;
-
-//Insertar imagenes
-for (var f = 0; f < fil; f++) {
-for (var c =0; c< col; c++) {
-  var ob = $("<img class='candy' id='candy_"+f+"_"+c+"' r='"+f+"' c='"+c+
-    "'ondrop='_onDrop(event)' ondragover='_onDragOverEnabled(event)'src='"+
-    arr[f][c].src+"' style='height:"+ch+"px'/>");
-  ob.attr("ondragstart","_ondragstart(event)");
-  $(".col-"+(c+1)).append(ob);
-  arr[f][c].o = ob;
-}
-}
-
-
-
-var timer = new Timer({tick : 1,ontick : function (ms) {
-	function addZ(n){return (n<10? '0':'') + n;}
-			var s = Math.trunc((ms/1000)%60);
-			var m = Math.trunc(ms/60000);
-	$("#timer").text(addZ(m) + ':' + addZ(s))
-    },
-    onstart : function() {
-    	$("#timer").text('01:59');
-		$('button.btn-reinicio').html("REINICIAR");},
-    onend : function() {
-    	$("#timer").text('00:00');
-    	alert('Time up!');
-    	clearInterval(timer);
-    }	
-});
-
-$('button.btn-reinicio').on('click',function(){
-i=0;
-poi=0;
-mov=0;
-$(".panel-score").css("width","25%");
-$("#score-text").html("0");
-$("#movimientos-text").html("0");
-timer.start(120);
-});
-
-//-------------------------------------------------------------------------------------------------
-
-function _ondragstart(a){
-a.dataTransfer.setData("text/plain", a.target.id);
-}
-
-// cuando se mueve una gema por encima de otra sin soltarla 
-function _onDragOverEnabled(e){
- e.preventDefault();
- console.log("pasando sobre caramelo " + e.target.id);
-}
-       
-// cuando soltas una gema sobre otra
-function _onDrop(e){
-  // solo para firefox
-  var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
-  if (isFirefox) {
-    console.log("firefox compatibility");
-    e.preventDefault();
+//Busqueda de Fila y Columna
+function ColFilaV() {
+  ColV();
+  FilaV();
+  if ($('img.delete').length != 0) {
+    animacionEliminar();
   }
+}
 
- // obtener origen del candy
- var src = e.dataTransfer.getData("text");
- var sr = src.split("_")[1];
- var sc = src.split("_")[2];
+//Añadir eventos
+function addEvents() {
+  $('img').draggable({
+    containment: '.panel-tablero',
+    droppable: 'img',
+    revert: true,
+    revertDuration: 500,
+    grid: [100, 100],
+    zIndex: 10,
+    drag: limitarMovimiento
+  });
+  $('img').droppable({
+    drop: intercambiar
+  });
+  enableEvents();
+}
 
- // obtener destino del candy
- var dst = e.target.id;
- var dr = dst.split("_")[1];
- var dc = dst.split("_")[2];
+function disableEvents() {
+  $('img').draggable('disable');
+  $('img').droppable('disable');
+}
 
- // si la distancia es mayor a 1, no permitir el movimiento y alertar
- var ddx = Math.abs(parseInt(sr)-parseInt(dr));
- var ddy = Math.abs(parseInt(sc)-parseInt(dc));
- if (ddx > 1 || ddy > 1)
- {
-   alert("Los movimientos no pueden tener una distancia mayor a 1");
-   return;
- }
- else{
-    console.log("intercambio " + sr + "," + sc+ " to " + dr + "," + dc);
-    // intercambio de gemas
-    var tmp = arr[sr][sc].src;
-    arr[sr][sc].src = arr[dr][dc].src;
-    arr[sr][sc].o.attr("src",arr[sr][sc].src);
-    arr[dr][dc].src = tmp;
-    arr[dr][dc].o.attr("src",arr[dr][dc].src);
+function enableEvents() {
+  $('img').draggable('enable');
+  $('img').droppable('enable');
+}
 
-    // sumar un movimiento a mi cantidad
-    mov+=1;
-    $("#movimientos-text").html(mov);
+//Limites de movimiento
+function limitarMovimiento(event, arrastrar) {
+  arrastrar.position.top = Math.min(100, arrastrar.position.top);
+  arrastrar.position.bottom = Math.min(100, arrastrar.position.bottom);
+  arrastrar.position.left = Math.min(100, arrastrar.position.left);
+  arrastrar.position.right = Math.min(100, arrastrar.position.right);
+}
 
-    //buscar combinaciones
-    eliminar(); 
-    
- }
+//Movimiento y Cambio
+function intercambiar(event, arrastrar) {
+  var arrastrar = $(arrastrar.draggable);
+  var arrastrarSrc = arrastrar.attr('src');
+  var soltar = $(this);
+  var soltarSrc = soltar.attr('src');
+  arrastrar.attr('src', soltarSrc);
+  soltar.attr('src', arrastrarSrc);
 
+  setTimeout(function() {
+    Btabla();
+    if ($('img.delete').length == 0) {
+      arrastrar.attr('src', arrastrarSrc);
+      soltar.attr('src', soltarSrc);
+    } else {
+      ActMov();
+    }
+  }, 500);
 
 }
 
-//-----------------------------------------
+function BtablaPromise(result) {
+  if (result) {
+    Btabla();
+  }
+}
 
-      function eliminar()
-      {    
-      
-       // busqueda horizontal
-      
-      
-        for (var f = 0; f < fil; f++)
-        {           
-        
-        
-          var prevCell = null;
-          var figureLen = 0;
-          var figureStart = null;
-          var figureStop = null;
-          
-          for (var c=0; c< col; c++)
-          {
-          
-            // saltear candys locked o que estan en combo.    
-            if (arr[f][c].locked || arr[f][c].isInCombo)
-            {
-              figureStart = null;
-              figureStop = null;
-              prevCell = null;  
-              figureLen = 1;
-              continue;
-            }
-            
-            // primer objeto del combo
-            if (prevCell==null) 
-            {
-              prevCell = arr[f][c].src;
-              figureStart = c;
-              figureLen = 1;
-              figureStop = null;
-              continue;
-            }
-            else
-            {
-              // segundo o posterior objeto del combo
-              var curCell = arr[f][c].src;
-              if (!(prevCell==curCell))
-              {
-                prevCell = arr[f][c].src;
-                figureStart = c;
-                figureStop=null;
-                figureLen = 1;
-                continue;
-              }
-              else
-              {
-                // incrementar combo
-                figureLen+=1;
-                if (figureLen==3)
-                {
-                  val+=1;
-                  poi+=10;
-                  $("#score-text").html(poi);
-                  figureStop = c;
-                  console.log("Combo de columna " + figureStart + " a columna " + figureStop);
-                  for (var ci=figureStart;ci<=figureStop;ci++)
-                  {
-                     
-                    arr[f][ci].isInCombo=true;
-                    arr[f][ci].src=null;                     
-                  }
-                  prevCell=null;
-                  figureStart = null;
-                  figureStop = null;
-                  figureLen = 1;
-                  continue;
-                }
-              }
-            }
-                  
-          }
-        }
-        
-       // busqueda vertical
-      
-      
-        for (var c=0; c< col; c++)
-        {              
-          var prevCell = null;
-          var figureLen = 0;
-          var figureStart = null;
-          var figureStop = null;
-          
-          for (var f = 0; f < fil; f++)
-          {
-            
-            if (arr[f][c].locked || arr[f][c].isInCombo)
-            {
-              figureStart = null;
-              figureStop = null;
-              prevCell = null;  
-              figureLen = 1;
-              continue;
-            }
-            
-            if (prevCell==null) 
-            {
-              prevCell = arr[f][c].src;
-              figureStart = f;
-              figureLen = 1;
-              figureStop = null;
-              continue;
-            }
-            else
-            {
-              var curCell = arr[f][c].src;
-              if (!(prevCell==curCell))
-              {
-                prevCell = arr[f][c].src;
-                figureStart = f;
-                figureStop=null;
-                figureLen = 1;
-                continue;
-              }
-              else
-              {
-                figureLen+=1;
-                if (figureLen==3)
-                {
-                  val+=1;
-                  poi+=10;
-                  $("#score-text").html(poi);
-                  figureStop = f;
-                  console.log("Combo de fila " + figureStart + " a fila " + figureStop );
-                  for (var ci=figureStart;ci<=figureStop;ci++)
-                  {
-                     
-                    arr[ci][c].isInCombo=true;
-                    arr[ci][c].src=null;         
-                  }
-                  prevCell=null;
-                  figureStart = null;
-                  figureStop = null;
-                  figureLen = 1;
-                  continue;
-                }
-              }
-            }
-                  
-          }
-        }
-        
-        
-        // destruir combos
-        
-         var isCombo=false;
-         for (var f = 0;f<fil;f++)
-          for (var c=0;c<col;c++)
-            if (arr[f][c].isInCombo)
-            { 
-              console.log("Combo disponible");
-              isCombo=true; 
-              // ACÁ FALTA LA ANIMACIÓN NADA MÁS, Y ESTARIA BIEN
-               reponer() // aca funciona bien 
-            }
-            
-        if (isCombo)  // Acá no entra nunca, el metodo lo termina llamando al final del reponer
-          desaparecerCombos();
-        else 
-        console.log("No más combos automáticos");
-        
-                          
-        
-      }
-    
-      //desaparecer candys borrados
-      function desaparecerCombos()
-      {
-         for (var r=0;f<fil;f++)  { 
-          for (var c=0;c<col;c++){
-            if (arr[f][c].isInCombo)  // celda vacia
-            {
-              arr[f][c].o.animate({
-                opacity:0
-              },slow);
-            } 
-          }   
-        } 
+//Actualizar valores de movimineto
+function ActMov() {
+  var actualValue = Number($('#movimientos-text').text());
+  var result = actualValue += 1;
+  $('#movimientos-text').text(result);
+}
 
-        // ACÁ ES DONDE DEBERIA IR EL REPONER() PERO NO ES LLAMADO NUNCA
-     //   $("[style*='opacity: 0']").promise().done(function() {
-      //       reponer();
-      //  });     
-      
-      }
-      
-   
-      
-      function reponer() {
-          // mover celdas vacias hacia arriba
-         for (var f=0;f<fil;f++)
-         {           
-          for (var c=0;c<col;c++)
-          {  
-            if (arr[f][c].isInCombo)  // celda vacia
-            {
-              arr[f][c].o.attr("src","");
-                // deshabilitar cerlda del combo               
-              arr[f][c].isInCombo=false;
-               
-              for (var sr=f;sr>=0;sr--)
-              {
-                if (sr==0) break; 
-                if (arr[sr-1][c].locked) break;       
-                var tmp = arr[sr][c].src;
-                arr[sr][c].src=arr[sr-1][c].src;
-                arr[sr-1][c].src=tmp;
-              }
-            } 
-          }  
-        }   
-                          
-          // reordenando y reponiendo celdas
-          for (var f=0;f<fil;f++)
-          { for (var c = 0;c<col;c++)
-            {
-              arr[f][c].o.attr("src",arr[f][c].src);
-              arr[f][c].o.css("opacity","1"); // acá podria meter animate
-              arr[f][c].isInCombo=false;
-              if (arr[f][c].src==null) 
-                arr[f][c].respawn=true;
-              if (arr[f][c].respawn==true)
-              {  
-                arr[f][c].o.off("ondragover");
-                arr[f][c].o.off("ondrop");
-                arr[f][c].o.off("ondragstart"); 
-                arr[f][c].respawn=false; // repuesto!
-                console.log("Reponiendo fila " + f+ " , columna " + c);
-                arr[f][c].src=NumeroAleatorio();
-                arr[f][c].locked=false;
-                arr[f][c].o.attr("src",arr[f][c].src);
-                arr[f][c].o.attr("ondragstart","_ondragstart(event)");
-                arr[f][c].o.attr("ondrop","_onDrop(event)");
-                arr[f][c].o.attr("ondragover","_onDragOverEnabled(event)");
-              }
-            }
-          }
-              
-           
-              
-          console.log("celdas repuestas");
-          
-          // revisar si hay combos pendientes despues de reordenar
-          eliminar();
-         
-      } 
+//Animacion siguiente
+function animacionEliminar() {
+  disableEvents();
+  $('img.delete').effect('pulsate', 1000);
+  $('img.delete').animate({
+    opacity: '0'
+  },{
+    duration: 800
+  }
+  )
+  .animate({
+    opacity: '0'
+  }
+  ,
+  {
+    duration: 1000,
+    complete: function() {
+      eliminarFigure()
+        .then(BtablaPromise)
+        .catch(ErrorPromise)
+    },
+    queue: true
+  }
+  )
+}
+
+function ErrorPromise(error) {
+  console.log(error);
+}
+
+//Eliminar  figura
+function eliminarFigure() {
+  return new Promise(function (resolve, reject) {
+    if($('img.delete').remove()) {
+      resolve(true);
+    } else {
+      reject('No se pueden eliminar');
+    }
+  })
+}
+
+//Terminar Juego
+function finalizar() {
+  $('div.panel-tablero, div.time').effect('fold');
+  $('h1.main-titulo').addClass('titulo-over')
+  .text('Juego terminado');
+  $('div.score, div.moves, div.panel-score').width('100%');
+}
+
+//Comenzar Juego
+function iniciarF() {
+
+  $('.btn-reinicio').click(function() {
+    if ($(this).text() == 'Reinicio') {
+      location.reload(true);
+    }
+    Btabla();
+    $(this).text('Reinicio');
+    $('#timer').startTimer({
+      onComplete: finalizar
+    })
+  });
+}
+
+//IniciarFuncion
+$(function() {
+  iniciarF();
+});
